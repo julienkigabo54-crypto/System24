@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Recommendations{% endblock %}
+{% block content %}
+<h1>Replenishment recommendations</h1>
+<p class="sub">Target stock = predicted demand for the window + the product's reorder level. Additional stock = target − current stock. Most urgent products first.</p>
+
+<div id="alertBox"></div>
+<div class="card">
+  <div class="toolbar">
+    <div class="field" style="max-width:200px"><label for="days">Planning window</label>
+      <select id="days"><option value="7">7 days</option><option value="14" selected>14 days</option><option value="30">30 days</option><option value="60">60 days</option></select></div>
+    <div class="field" style="max-width:200px"><label for="filter">Show</label>
+      <select id="filter"><option value="">All products</option><option value="Critical">Critical</option><option value="Low Stock">Low Stock</option><option value="OK">OK</option><option value="Overstock">Overstock</option><option value="order">Needs ordering</option></select></div>
+    <a class="btn" id="csv" href="/api/reports/inventory.csv">Download CSV report</a>
+  </div>
+  <div class="table-wrap" id="rows"></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/recommendations.js') }}"></script>{% endblock %}

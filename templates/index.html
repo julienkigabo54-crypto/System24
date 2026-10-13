@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Know what to order before you run out.</h1>
+  <p>The Intelligent Inventory System records every stock movement, learns each product's demand pattern
+     from history, predicts the coming weeks and tells you how much extra stock to buy, and how urgent it is.</p>
+  <div class="actions">
+    <a class="btn primary" href="/dashboard">Open dashboard</a>
+    <a class="btn" href="/products">Manage products</a>
+    <a class="btn" href="/predict">Predict demand</a>
+  </div>
+</section>
+
+<div class="grid cols-2">
+  <div class="card">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><b>Register products</b> and record stock-in / stock-out. Every movement is saved to the daily history.</li>
+      <li><b>Prepare the data.</b> Duplicates and missing values are cleaned, then features are built from the history.</li>
+      <li><b>Train the model.</b> Linear Regression (and a Random Forest for comparison) learn demand patterns and are scored with MAE, MSE, RMSE and R².</li>
+      <li><b>Predict and decide.</b> Predicted demand is compared with current stock and the reorder level to classify each product and recommend an order quantity.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>Stock status rules</h2>
+    <p><span class="badge critical">Critical</span> Out of stock, or it will run out before a supplier could deliver (lead time).</p>
+    <p><span class="badge low">Low Stock</span> At or below the product's reorder level.</p>
+    <p><span class="badge ok">OK</span> Enough stock for the coming period.</p>
+    <p><span class="badge over">Overstock</span> Far more than the coming period needs, so cash is tied up.</p>
+    <p class="sub" style="margin-bottom:0">Thresholds are defined in <code>config.py</code>.</p>
+  </div>
+</div>
+{% endblock %}

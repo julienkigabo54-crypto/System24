@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}ML Model{% endblock %}
+{% block content %}
+<h1>Machine-learning model</h1>
+<p class="sub">Train, evaluate and retrain the demand-prediction models. The newest 20% of dates are held out and used only for scoring.</p>
+
+<div id="notice"></div>
+<div class="grid cols-2">
+  <div class="card">
+    <h2>Training data</h2>
+    <div id="quality" class="table-wrap"></div>
+    <div class="toolbar mt"><button id="btnClean">Clean data now</button></div>
+    <p class="sub" style="margin:0">Cleaning removes duplicate rows and fills missing values in the stored history. Days with no record are treated as zero demand when the dataset is built.</p>
+  </div>
+  <div class="card">
+    <h2>Train / retrain</h2>
+    <div id="meta" class="sub"></div>
+    <div class="toolbar">
+      <div class="field" style="max-width:220px"><label for="active">Model used for predictions</label>
+        <select id="active"><option value="linear_regression">Linear Regression</option><option value="random_forest">Random Forest</option></select></div>
+      <button class="primary" id="btnTrain">Train models</button>
+      <button id="btnRetrain">Retrain on latest data</button>
+    </div>
+    <div id="retrainResult"></div>
+  </div>
+</div>
+
+<div class="card mt">
+  <h2>Model performance (held-out test data)</h2>
+  <div class="table-wrap" id="metrics"></div>
+  <p class="sub" style="margin:10px 0 0">MAE: average error in units. MSE/RMSE: penalise large errors (RMSE is in units). R²: share of demand variation explained (1 is perfect). Lower is better for MAE, MSE, RMSE; higher for R².</p>
+</div>
+
+<div class="grid cols-2 mt">
+  <div class="card"><h2>Actual vs predicted (test period, all products)</h2><div class="chart-box"><canvas id="curve"></canvas></div></div>
+  <div class="card"><h2>What the model relies on</h2><div class="chart-box"><canvas id="importance"></canvas></div></div>
+</div>
+
+<div class="card mt"><h2>Training history</h2><div class="table-wrap" id="runs"></div></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/model.js') }}"></script>{% endblock %}

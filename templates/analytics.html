@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h1>Inventory analytics</h1>
+<p class="sub">Demand patterns and trends found in the inventory history.</p>
+
+<div class="card">
+  <h2>Historical vs predicted demand</h2>
+  <div class="toolbar">
+    <div class="field" style="max-width:320px"><label for="product">Product</label><select id="product"></select></div>
+    <div class="field" style="max-width:160px"><label for="days">Predict days</label><input id="days" type="number" min="1" max="90" value="14"></div>
+    <a class="btn" id="png" target="_blank" href="#">Matplotlib report image</a>
+  </div>
+  <div class="chart-box"><canvas id="seriesChart"></canvas></div>
+</div>
+
+<div class="grid cols-2 mt">
+  <div class="card"><h2>Total demand per month</h2><div class="chart-box"><canvas id="monthChart"></canvas></div></div>
+  <div class="card"><h2>Average demand by weekday</h2><div class="chart-box"><canvas id="weekChart"></canvas></div></div>
+</div>
+<div class="grid cols-2 mt">
+  <div class="card"><h2>Demand by category (last 90 days)</h2><div class="chart-box"><canvas id="catChart"></canvas></div></div>
+  <div class="card"><h2>Inventory value by category</h2><div class="chart-box"><canvas id="valueChart"></canvas></div></div>
+</div>
+
+<div class="card mt">
+  <h2>Demand statistics per product (last 90 days)</h2>
+  <div class="table-wrap" id="stats"></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Stock In/Out{% endblock %}
+{% block content %}
+<h1>Stock-in and stock-out</h1>
+<p class="sub">Record deliveries and sales. Quantities update immediately and each movement is added to today's inventory history. A withdrawal larger than the available stock is rejected.</p>
+
+<div class="grid cols-2">
+  <div class="card">
+    <h2>Record a movement</h2>
+    <form id="moveForm" class="grid" novalidate>
+      <div><label for="product">Product</label><select id="product"></select></div>
+      <div id="current" class="notice" hidden></div>
+      <div><label for="qty">Quantity</label><input id="qty" type="number" min="1" step="1" value="1"></div>
+      <div style="display:flex;gap:10px">
+        <button type="button" class="primary" id="btnIn">+ Stock-in</button>
+        <button type="button" id="btnOut">– Stock-out</button>
+      </div>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Recent history for this product</h2>
+    <div class="table-wrap" id="recent"></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/stock.js') }}"></script>{% endblock %}

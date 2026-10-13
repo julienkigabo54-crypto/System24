@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<h1>Inventory history</h1>
+<p class="sub">One record per product per day: units received, units sold (demand) and the closing stock.</p>
+
+<div class="card">
+  <div class="toolbar">
+    <div class="field"><label for="product">Product</label><select id="product"></select></div>
+    <div class="field"><label for="start">From</label><input id="start" type="date"></div>
+    <div class="field"><label for="end">To</label><input id="end" type="date"></div>
+    <div class="field" style="flex:0 0 120px"><label for="limit">Rows</label><select id="limit"><option>100</option><option selected>200</option><option>500</option><option>2000</option></select></div>
+    <button class="primary" id="apply">Apply</button>
+  </div>
+  <div id="chartCard" hidden class="chart-box" style="height:260px;margin-bottom:14px"><canvas id="chart"></canvas></div>
+  <div class="table-wrap" id="rows"></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/history.js') }}"></script>{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Prediction{% endblock %}
+{% block content %}
+<h1>Demand prediction</h1>
+<p class="sub">Predict demand for one product over the next days (starting tomorrow) and see how much extra stock is needed. Every prediction is stored.</p>
+
+<div class="card">
+  <form id="form" class="form-grid" novalidate>
+    <div><label for="product">Product</label><select id="product"></select></div>
+    <div><label for="days">Days ahead (1 to 90)</label><input id="days" type="number" min="1" max="90" value="14"></div>
+    <div><label for="model">Model</label><select id="model"><option value="">Active model</option><option value="linear_regression">Linear Regression</option><option value="random_forest">Random Forest</option></select></div>
+    <div><button class="primary" type="submit">Predict</button></div>
+  </form>
+</div>
+
+<div id="result" hidden>
+  <div class="kpis mt" id="kpis"></div>
+  <div class="notice" id="reco"></div>
+  <div class="grid cols-2">
+    <div class="card"><h2>Historical vs predicted demand</h2><div class="chart-box"><canvas id="chart"></canvas></div></div>
+    <div class="card"><h2>Predicted demand per day</h2><div class="table-wrap" style="max-height:300px;overflow-y:auto" id="daily"></div></div>
+  </div>
+</div>
+
+<div class="card mt">
+  <h2>Stored predictions</h2>
+  <div class="table-wrap" id="stored"></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/predict.js') }}"></script>{% endblock %}
