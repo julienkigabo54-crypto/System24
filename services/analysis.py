@@ -41,15 +41,15 @@ def stock_requirement(stock, horizon_total, reorder_level):
 
 
 def recommendation_text(status, additional, cover_days, days):
-    cover = "no demand expected" if cover_days is None else f"about {cover_days:.0f} days of cover"
+    cover = "no sales are expected" if cover_days is None else f"enough for about {cover_days:.0f} days of sales"
     if status == "Critical":
-        return f"URGENT: order {additional} units now. Stock will not last until a delivery arrives ({cover})."
+        return f"Urgent: order {additional} units now. The stock is likely to run out before a new delivery can arrive ({cover})."
     if status == "Low Stock":
-        return f"Reorder {additional} units soon. Stock is at or below the reorder level ({cover})."
+        return f"Order {additional} units soon. The stock has reached the reorder level ({cover})."
     if status == "Overstock":
-        return f"Do not reorder. Stock is far above the {days}-day need ({cover}); consider a promotion."
+        return f"Do not order more. You have far more than the next {days} days need ({cover}). Consider a sale or discount."
     if additional > 0:
-        return f"Stock is adequate now, but order {additional} units to cover the next {days} days plus the safety buffer."
+        return f"Stock is fine for now, but order {additional} units to be ready for the next {days} days."
     return f"No action needed ({cover})."
 
 
@@ -210,9 +210,9 @@ def trends(db):
     recent["category"] = recent["product_id"].map(lambda p: products[p]["category"])
     cat = recent.groupby("category")["demand"].sum().sort_values(ascending=False)
     top = recent.groupby("product_id")["demand"].sum().sort_values(ascending=False).head(5)
-    names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     return {
-        "monthly": {"labels": [str(p) for p in m.index], "demand": [round(float(v), 1) for v in m.values]},
+        "monthly": {"labels": [p.strftime("%B %Y") for p in m.index], "demand": [round(float(v), 1) for v in m.values]},
         "weekday": {"labels": [names[i] for i in wd.index], "avg_demand": [round(float(v), 1) for v in wd.values]},
         "category": {"labels": list(cat.index), "demand": [round(float(v), 1) for v in cat.values]},
         "top_products": [{"product_id": p, "name": products[p]["name"], "demand_90d": round(float(v), 1)}

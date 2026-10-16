@@ -120,7 +120,7 @@ def test_analytics_and_reports(seeded):
     assert seeded.get("/api/analytics/inventory-value").get_json()["labels"]
     csv = seeded.get("/api/reports/inventory.csv")
     assert csv.status_code == 200 and csv.mimetype == "text/csv"
-    assert csv.get_data(as_text=True).startswith("Product ID,Name")
+    assert csv.get_data(as_text=True).startswith("Product code,Product name")
     png = seeded.get("/api/reports/demand-chart/P0001.png")
     assert png.status_code == 200 and png.data[:4] == b"\x89PNG"
 
@@ -132,11 +132,25 @@ def test_general_error_handling(client):
     assert client.get("/api/health").get_json() == {"status": "ok"}
 
 
-def test_every_page_renders(client):
-    for url in ("/", "/dashboard", "/products", "/stock", "/history", "/predict",
-                "/recommendations", "/analytics", "/model"):
+def test_every_page_renders_and_the_dashboard_is_the_start_page(client):
+    for url in ("/", "/products", "/stock", "/history", "/predict", "/recommendations", "/analytics", "/model"):
         r = client.get(url)
         assert r.status_code == 200 and b"Intelligent" in r.data, url
+    assert b"Dashboard" in client.get("/").data
+    assert client.get("/dashboard").status_code == 301          # old address forwards to the start page
+    menu = client.get("/").get_data(as_text=True)
+    assert 'href="/dashboard"' not in menu and ">Home<" not in menu   # no separate home page
+
+
+def test_screen_text_uses_full_words():
+    """No technical abbreviations in the text people read on screen."""
+    import re
+    from pathlib import Path
+    root = Path(__file__).resolve().parent.parent
+    banned = re.compile(r"\b(MAE|RMSE|MSE|CSV|PNG|ML|SKU|KPI|Qty|Std|R\u00b2)\b")
+    for path in list((root / "templates").glob("*.html")) + list((root / "static" / "js").glob("*.js")):
+        hits = banned.findall(path.read_text(encoding="utf-8"))
+        assert not hits, f"{path.name} contains abbreviations: {hits}"
 
 
 def test_forecast_bridges_a_gap_between_history_and_today(seeded, seeded_app):

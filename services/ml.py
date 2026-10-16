@@ -69,7 +69,7 @@ def set_active_model(cfg, name):
 def _load_bundle(cfg, name):
     path = _paths(cfg)[0] / f"{name}.joblib"
     if not path.exists():
-        raise ApiError("No trained model found. Train the model first (ML Model page).", 409)
+        raise ApiError("No trained model found. Train the model first (open the Prediction Model page).", 409)
     key = (str(path), path.stat().st_mtime_ns)
     if key not in _cache:
         _cache.clear()
@@ -130,7 +130,9 @@ def train(db, cfg, active=None, trigger="train", today=None):
         # final model: refit on ALL data so the newest history is used
         final = _new_model(name).fit(frame[prep.FEATURES], frame["demand"])
         if name == "linear_regression":
-            importance[name] = {f: round(float(c), 4) for f, c in zip(prep.FEATURES, final.coef_)}
+            # coefficient x spread of the feature, so features measured in different units can be compared
+            spread = frame[prep.FEATURES].std().to_numpy()
+            importance[name] = {f: round(float(abs(c) * sd), 4) for f, c, sd in zip(prep.FEATURES, final.coef_, spread)}
         else:
             importance[name] = {f: round(float(c), 4) for f, c in zip(prep.FEATURES, final.feature_importances_)}
         joblib.dump({"model": final, "features": prep.FEATURES, "origin": str(origin.date()),

@@ -3,7 +3,7 @@ from datetime import date, datetime
 
 from pymongo import ReturnDocument
 
-from .errors import ApiError, clean_int, clean_product_id, require_json
+from .errors import ApiError, clean_int, clean_product_id, label, require_json
 
 PUBLIC = {"_id": 0}
 
@@ -36,7 +36,7 @@ def record_movement(db, payload, kind):
             if not existing:
                 raise ApiError(f"Product '{pid}' was not found.", 404)
             raise ApiError(
-                f"Insufficient stock: requested {qty}, only {existing['quantity']} available.", 409,
+                f"Insufficient stock: you asked to remove {qty} units but only {existing['quantity']} are available.", 409,
                 {"requested": qty, "available": existing["quantity"]},
             )
 
@@ -67,7 +67,7 @@ def get_history(db, product_id=None, start=None, end=None, limit=500):
             try:
                 datetime.strptime(value, "%Y-%m-%d")
             except ValueError:
-                raise ApiError(f"'{key}' must be a date in YYYY-MM-DD format.", 400)
+                raise ApiError(f"{label(key)} must be a valid date.", 400)
             date_filter[op] = value
     if date_filter:
         query["date"] = date_filter

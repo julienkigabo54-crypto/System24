@@ -1,4 +1,4 @@
-const { api, esc, num, toast, busy, productSelect } = App;
+const { api, esc, num, toast, busy } = App;
 const $ = (id) => document.getElementById(id);
 let products = [];
 
@@ -7,22 +7,22 @@ function showCurrent() {
   const box = $("current");
   if (!p) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `Current stock: <b>${num(p.quantity)}</b> units &nbsp;·&nbsp; Reorder level: ${num(p.reorder_level)}`;
+  box.innerHTML = `In stock now: <b>${num(p.quantity)} units</b>. Reorder level: ${num(p.reorder_level)} units.`;
 }
 
 async function loadRecent() {
   const pid = $("product").value;
-  if (!pid) { $("recent").innerHTML = '<div class="empty">No products yet.</div>'; return; }
+  if (!pid) { $("recent").innerHTML = '<div class="empty">There are no products yet. Add one on the Products page.</div>'; return; }
   const rows = await api(`/history?product_id=${encodeURIComponent(pid)}&limit=10`);
-  $("recent").innerHTML = rows.length ? `<table><thead><tr><th>Date</th><th class="num">In</th><th class="num">Out</th><th class="num">Closing</th></tr></thead><tbody>` +
+  $("recent").innerHTML = rows.length ? `<table><thead><tr><th>Date</th><th class="num">Stock added</th><th class="num">Units sold</th><th class="num">Stock left at the end of the day</th></tr></thead><tbody>` +
     rows.map((r) => `<tr><td>${esc(r.date)}</td><td class="num">${num(r.stock_in)}</td><td class="num">${num(r.stock_out)}</td><td class="num">${num(r.closing_stock)}</td></tr>`).join("") + "</tbody></table>"
-    : '<div class="empty">No history yet.</div>';
+    : '<div class="empty">No records yet for this product.</div>';
 }
 
 async function refresh() {
   products = await api("/products");
   const cur = $("product").value;
-  $("product").innerHTML = products.map((p) => `<option value="${esc(p.product_id)}" ${p.product_id === cur ? "selected" : ""}>${esc(p.product_id)} – ${esc(p.name)}</option>`).join("");
+  $("product").innerHTML = products.map((p) => `<option value="${esc(p.product_id)}" ${p.product_id === cur ? "selected" : ""}>${esc(p.name)} (${esc(p.product_id)})</option>`).join("");
   showCurrent();
   await loadRecent();
 }
@@ -30,7 +30,8 @@ async function refresh() {
 async function move(kind, btn) {
   await busy(btn, async () => {
     const r = await api("/stock/" + kind, { json: { product_id: $("product").value, quantity: $("qty").value } });
-    toast(`${r.movement}: ${r.quantity} units. New stock: ${r.new_quantity}`);
+    const what = kind === "in" ? "added to" : "removed from";
+    toast(`${r.quantity} units were ${what} the stock. There are now ${r.new_quantity} units in stock.`);
     await refresh();
   });
 }

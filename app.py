@@ -37,8 +37,8 @@ def register_error_handlers(app):
     @app.errorhandler(PyMongoError)
     def db_error(e):
         log.exception("Database error")
-        return jsonify({"error": "The database is unavailable. Check MONGO_URI and your network "
-                                 "access list in MongoDB Atlas."}), 503
+        return jsonify({"error": "Cannot reach the database. Check that MongoDB is running and that the "
+                                 "connection settings in the .env file are correct."}), 503
 
     @app.errorhandler(404)
     def not_found(e):

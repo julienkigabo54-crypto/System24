@@ -1,41 +1,55 @@
 {% extends "base.html" %}
-{% block title %}ML Model{% endblock %}
 {% block content %}
-<h1>Machine-learning model</h1>
-<p class="sub">Train, evaluate and retrain the demand-prediction models. The newest 20% of dates are held out and used only for scoring.</p>
-
 <div id="notice"></div>
+
 <div class="grid cols-2">
-  <div class="card">
-    <h2>Training data</h2>
-    <div id="quality" class="table-wrap"></div>
-    <div class="toolbar mt"><button id="btnClean">Clean data now</button></div>
-    <p class="sub" style="margin:0">Cleaning removes duplicate rows and fills missing values in the stored history. Days with no record are treated as zero demand when the dataset is built.</p>
-  </div>
-  <div class="card">
-    <h2>Train / retrain</h2>
-    <div id="meta" class="sub"></div>
-    <div class="toolbar">
-      <div class="field" style="max-width:220px"><label for="active">Model used for predictions</label>
-        <select id="active"><option value="linear_regression">Linear Regression</option><option value="random_forest">Random Forest</option></select></div>
-      <button class="primary" id="btnTrain">Train models</button>
-      <button id="btnRetrain">Retrain on latest data</button>
+  <section class="panel">
+    <h2>Your sales records</h2>
+    <p class="hint">The model learns from these records, so they should be tidy. Cleaning removes repeated records and fills in empty fields. Days with no record are treated as days with no sales.</p>
+    <div class="table-wrap" id="quality"></div>
+    <div class="button-row" style="margin-top:16px"><button id="btnClean">Clean the records</button></div>
+  </section>
+
+  <section class="panel">
+    <h2>Train the prediction model</h2>
+    <p class="hint">Training lets the system study your past sales and learn their patterns. Train it again whenever many new sales have been recorded.</p>
+    <div id="meta" class="hint"></div>
+    <div class="field" style="max-width:340px;margin-bottom:16px">
+      <label for="active">Method used for predictions</label>
+      <select id="active"><option value="linear_regression">Linear Regression</option><option value="random_forest">Random Forest</option></select>
+      <span class="help" id="methodHelp"></span>
     </div>
-    <div id="retrainResult"></div>
-  </div>
+    <div class="button-row">
+      <button class="primary" id="btnTrain">Train the prediction model</button>
+      <button id="btnRetrain">Train again with the latest records</button>
+    </div>
+    <div id="retrainResult" style="margin-top:16px"></div>
+  </section>
 </div>
 
-<div class="card mt">
-  <h2>Model performance (held-out test data)</h2>
+<section class="panel">
+  <h2>How accurate is the model?</h2>
+  <p class="hint">To check accuracy, the most recent 20 percent of days were kept hidden while the model learned. The model then predicted those days, and its predictions were compared with what really happened. The best score in each row is shown in green.</p>
   <div class="table-wrap" id="metrics"></div>
-  <p class="sub" style="margin:10px 0 0">MAE: average error in units. MSE/RMSE: penalise large errors (RMSE is in units). R²: share of demand variation explained (1 is perfect). Lower is better for MAE, MSE, RMSE; higher for R².</p>
+</section>
+
+<div class="grid cols-2">
+  <section class="panel">
+    <h2>Predicted sales compared with real sales</h2>
+    <p class="hint">Each point is one of the hidden days, with all products added together. The closer the lines are, the better the model.</p>
+    <div class="chart-box tall"><canvas id="curve" aria-label="Predicted sales compared with real sales"></canvas></div>
+  </section>
+  <section class="panel">
+    <h2>What the model pays attention to</h2>
+    <p class="hint">The longer the bar, the more that piece of information influences the prediction.</p>
+    <div class="chart-box tall"><canvas id="importance" aria-label="What the model pays attention to"></canvas></div>
+  </section>
 </div>
 
-<div class="grid cols-2 mt">
-  <div class="card"><h2>Actual vs predicted (test period, all products)</h2><div class="chart-box"><canvas id="curve"></canvas></div></div>
-  <div class="card"><h2>What the model relies on</h2><div class="chart-box"><canvas id="importance"></canvas></div></div>
-</div>
-
-<div class="card mt"><h2>Training history</h2><div class="table-wrap" id="runs"></div></div>
+<section class="panel">
+  <h2>Training history</h2>
+  <p class="hint">Every time the model is trained, its scores are saved here. Lower error values and a higher R-squared score are better.</p>
+  <div class="table-wrap" id="runs"></div>
+</section>
 {% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/model.js') }}"></script>{% endblock %}

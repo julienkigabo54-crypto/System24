@@ -42,7 +42,7 @@ def create_product(db, payload):
     try:
         db.products.insert_one(doc)
     except DuplicateKeyError:
-        raise ApiError(f"Product ID '{product_id}' already exists.", 409)
+        raise ApiError(f"Product code '{product_id}' already exists. Please choose a different code.", 409)
     if quantity > 0:  # opening stock is part of the inventory history
         db.inventory_history.update_one(
             {"product_id": product_id, "date": date.today().isoformat()},
@@ -79,9 +79,9 @@ def update_product(db, product_id, payload):
     payload = require_json(payload)
     get_product(db, product_id)  # 404 if missing
     if "quantity" in payload:
-        raise ApiError("Quantity cannot be edited directly. Record a stock-in or stock-out instead.", 400)
+        raise ApiError("The quantity cannot be edited here. Use the Add or Remove Stock page instead.", 400)
     if "product_id" in payload and str(payload["product_id"]).upper() != str(product_id).upper():
-        raise ApiError("The product ID cannot be changed.", 400)
+        raise ApiError("The product code cannot be changed.", 400)
     changes = {}
     if "name" in payload:
         changes["name"] = clean_text(payload["name"], "name", 100)
@@ -92,7 +92,7 @@ def update_product(db, product_id, payload):
     if "reorder_level" in payload:
         changes["reorder_level"] = clean_int(payload["reorder_level"], "reorder_level")
     if not changes:
-        raise ApiError("No editable fields were provided (name, category, price, reorder_level).", 400)
+        raise ApiError("Nothing to update. You can change the name, category, price or reorder level.", 400)
     changes["updated_at"] = _now()
     db.products.update_one({"product_id": str(product_id).upper()}, {"$set": changes})
     return get_product(db, product_id)

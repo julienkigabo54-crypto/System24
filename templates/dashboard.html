@@ -1,35 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
 {% block content %}
-<h1>Inventory dashboard</h1>
-<p class="sub">Live stock position and the predicted need for the planning window.</p>
-
 <div class="toolbar">
-  <div class="field" style="max-width:220px">
-    <label for="days">Planning window</label>
-    <select id="days"><option value="7">Next 7 days</option><option value="14" selected>Next 14 days</option><option value="30">Next 30 days</option></select>
+  <div class="field" style="max-width:260px">
+    <label for="days">Look ahead</label>
+    <select id="days">
+      <option value="7">The next 7 days</option>
+      <option value="14" selected>The next 14 days</option>
+      <option value="30">The next 30 days</option>
+    </select>
   </div>
 </div>
-<div id="notice"></div>
 
-<div class="kpis" id="kpis"></div>
+<div id="notice"></div>
+<div id="summary"></div>
+<div class="figures" id="figures" style="margin-top:20px"></div>
 
 <div class="grid cols-2">
-  <div class="card"><h2>Products by status</h2><div class="chart-box"><canvas id="statusChart"></canvas></div></div>
-  <div class="card"><h2>Recommended order quantity (top products)</h2><div class="chart-box"><canvas id="orderChart"></canvas></div></div>
-</div>
-<div class="grid cols-2 mt">
-  <div class="card"><h2>Predicted demand by product</h2><div class="chart-box"><canvas id="demandChart"></canvas></div></div>
-  <div class="card"><h2>Inventory value by category</h2><div class="chart-box"><canvas id="valueChart"></canvas></div></div>
+  <section class="panel">
+    <h2>Stock health</h2>
+    <p class="hint">How many products are in each situation right now.</p>
+    <div class="chart-box" style="height:230px"><canvas id="statusChart" aria-label="Number of products in each stock situation"></canvas></div>
+    <div class="legend" id="legend" style="margin-top:18px"></div>
+  </section>
+  <section class="panel">
+    <h2>Units to order for each product</h2>
+    <p class="hint">The products with the largest recommended orders. Colours show how urgent each one is.</p>
+    <div class="chart-box tall"><canvas id="orderChart" aria-label="Units to order for each product"></canvas></div>
+  </section>
 </div>
 
-<div class="card mt">
-  <h2>Alerts: critical and low-stock products</h2>
+<div class="grid cols-2">
+  <section class="panel">
+    <h2>Expected sales compared with stock in hand</h2>
+    <p class="hint">Where the dark bar is taller than the light bar, the stock will not cover the expected sales.</p>
+    <div class="chart-box"><canvas id="demandChart" aria-label="Expected sales compared with stock in hand"></canvas></div>
+  </section>
+  <section class="panel">
+    <h2>Value of the stock in each category</h2>
+    <p class="hint">The number of units in stock multiplied by the price of each unit.</p>
+    <div class="chart-box"><canvas id="valueChart" aria-label="Value of the stock in each category"></canvas></div>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Products that need attention</h2>
+  <p class="hint">Products that are critical or running low. Move your mouse over a status to see what it means.</p>
   <div class="table-wrap" id="alerts"></div>
-</div>
-<div class="card mt">
+</section>
+
+<section class="panel">
   <h2>Recommended orders</h2>
+  <p class="hint">The ten products where the most stock should be ordered.</p>
   <div class="table-wrap" id="orders"></div>
-</div>
+</section>
 {% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>{% endblock %}

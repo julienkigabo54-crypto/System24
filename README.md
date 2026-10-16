@@ -34,8 +34,8 @@ pip install -r requirements.txt
 python seed_data.py     # 15 sample products + 365 days of history (RESETS the database)
 python app.py           # open http://localhost:5000
 ```
-Then open **ML Model → Train models**, and the Dashboard, Prediction and Recommendations pages
-will show machine-learning results.
+Then open **Prediction Model → Train the prediction model**, and the Dashboard, Predict Sales and
+What to Order pages will show machine-learning results.
 
 > The seed data is **synthetic**. It contains a few deliberate problems (duplicate rows, missing
 > values, missing days) so the cleaning step has something to do. Use `--no-dirty` to skip them.
@@ -58,7 +58,7 @@ pytest -q          # uses an in-memory database (mongomock), never your Atlas da
 | Decisions | `services/analysis.py` | Stock requirement, status classification, recommendations, dashboard, analytics |
 | Reports | `services/reports.py` | CSV report and Matplotlib chart (PNG) |
 | API | `routes/api.py` | JSON REST endpoints under `/api` |
-| Pages | `templates/`, `static/` | Landing, Dashboard, Products, Stock In/Out, History, Prediction, Recommendations, Analytics, ML Model |
+| Pages | `templates/`, `static/` | Dashboard (the start page), Products, Add or Remove Stock, Stock History, Predict Sales, What to Order, Analytics, Prediction Model |
 
 ### The machine-learning model
 * One training example = one product on one day; the target is that day's demand (units sold).
@@ -66,9 +66,9 @@ pytest -q          # uses an in-memory database (mongomock), never your Atlas da
 * The **newest 20% of dates are held out** and only used to score the models, so the scores measure
   prediction of the future. The final model is then refitted on all data and saved with Joblib.
 * To predict several days ahead, the model predicts one day, feeds it back as "yesterday" and repeats.
-* **Retraining** (`/api/ml/retrain` or the button on the ML Model page) repeats the process on the
+* **Retraining** (`/api/ml/retrain` or the "Train again" button on the Prediction Model page) repeats the process on the
   latest history and shows the old and new scores.
-* Linear Regression is used for predictions by default; Random Forest can be selected on the ML Model page.
+* Linear Regression is used for predictions by default; Random Forest can be selected on the Prediction Model page.
 
 ### Business rules (editable in `config.py`)
 * **Target stock** = predicted demand for the window + reorder level (safety buffer)
@@ -100,4 +100,6 @@ Errors are JSON `{"error": "..."}` with proper status codes (400 invalid input, 
 * Quantities cannot be edited directly; they change only through stock movements so the history stays correct.
 * Deleting a product also deletes its history and predictions.
 * Chart.js is loaded from a CDN, so the charts need an internet connection.
+* The screens use plain, full words (no abbreviations) so that non-technical staff can follow them. The four stock
+  statuses keep the names required by the brief: Critical, Low Stock, OK and Overstock.
 * Stock movements are recorded as one aggregated row per product per day (not one row per transaction).

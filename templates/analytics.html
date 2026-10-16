@@ -1,31 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Analytics{% endblock %}
 {% block content %}
-<h1>Inventory analytics</h1>
-<p class="sub">Demand patterns and trends found in the inventory history.</p>
-
-<div class="card">
-  <h2>Historical vs predicted demand</h2>
+<section class="panel">
+  <h2>Past sales and predicted sales for one product</h2>
+  <p class="hint">Choose a product to compare what it sold in the past with what is expected to sell next.</p>
   <div class="toolbar">
-    <div class="field" style="max-width:320px"><label for="product">Product</label><select id="product"></select></div>
-    <div class="field" style="max-width:160px"><label for="days">Predict days</label><input id="days" type="number" min="1" max="90" value="14"></div>
-    <a class="btn" id="png" target="_blank" href="#">Matplotlib report image</a>
+    <div class="field" style="max-width:360px"><label for="product">Product</label><select id="product"></select></div>
+    <div class="field" style="max-width:220px"><label for="days">Days to predict</label><input id="days" type="number" min="1" max="90" value="14"></div>
+    <a class="btn" id="png" target="_blank" href="#">Open this chart as a picture</a>
   </div>
-  <div class="chart-box"><canvas id="seriesChart"></canvas></div>
+  <div class="chart-box tall"><canvas id="seriesChart" aria-label="Past sales and predicted sales"></canvas></div>
+</section>
+
+<div class="grid cols-2">
+  <section class="panel">
+    <h2>Units sold each month</h2>
+    <p class="hint">All products added together.</p>
+    <div class="chart-box"><canvas id="monthChart" aria-label="Units sold each month"></canvas></div>
+  </section>
+  <section class="panel">
+    <h2>Average units sold on each day of the week</h2>
+    <p class="hint">Shows which days are busy and which are quiet.</p>
+    <div class="chart-box"><canvas id="weekChart" aria-label="Average units sold on each day of the week"></canvas></div>
+  </section>
 </div>
 
-<div class="grid cols-2 mt">
-  <div class="card"><h2>Total demand per month</h2><div class="chart-box"><canvas id="monthChart"></canvas></div></div>
-  <div class="card"><h2>Average demand by weekday</h2><div class="chart-box"><canvas id="weekChart"></canvas></div></div>
-</div>
-<div class="grid cols-2 mt">
-  <div class="card"><h2>Demand by category (last 90 days)</h2><div class="chart-box"><canvas id="catChart"></canvas></div></div>
-  <div class="card"><h2>Inventory value by category</h2><div class="chart-box"><canvas id="valueChart"></canvas></div></div>
+<div class="grid cols-2">
+  <section class="panel">
+    <h2>Units sold in each category</h2>
+    <p class="hint">Over the last 90 days.</p>
+    <div class="chart-box"><canvas id="catChart" aria-label="Units sold in each category"></canvas></div>
+  </section>
+  <section class="panel">
+    <h2>Value of the stock in each category</h2>
+    <p class="hint">The number of units in stock multiplied by the price of each unit.</p>
+    <div class="chart-box"><canvas id="valueChart" aria-label="Value of the stock in each category"></canvas></div>
+  </section>
 </div>
 
-<div class="card mt">
-  <h2>Demand statistics per product (last 90 days)</h2>
+<section class="panel">
+  <h2>Sales details for each product</h2>
+  <p class="hint">Based on the last 90 days of sales, sorted from the best seller down.</p>
   <div class="table-wrap" id="stats"></div>
-</div>
+  <details class="explain">
+    <summary>What do these columns mean?</summary>
+    <dl>
+      <dt>Total units sold</dt><dd>How many units of the product were sold in the 90 days.</dd>
+      <dt>Average sold per day</dt><dd>The total divided by the number of days.</dd>
+      <dt>Day-to-day variation (standard deviation)</dt><dd>How much the daily sales usually move up or down from the average. A small number means sales are steady.</dd>
+      <dt>Highest in one day</dt><dd>The most units sold on a single day.</dd>
+      <dt>Unevenness of sales</dt><dd>The day-to-day variation divided by the average. Near 0 means very steady; above 1 means sales jump around a lot.</dd>
+      <dt>Direction</dt><dd>Whether sales have been going up, going down, or staying steady. A change of more than 10 percent over the period counts as going up or down.</dd>
+    </dl>
+  </details>
+</section>
 {% endblock %}
 {% block scripts %}<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>{% endblock %}

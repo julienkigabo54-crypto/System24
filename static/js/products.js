@@ -15,23 +15,22 @@ async function loadList() {
   if ($("catFilter").value) params.set("category", $("catFilter").value);
   try {
     const items = await api("/products?" + params);
-    $("list").innerHTML = items.length ? `<table><thead><tr><th>ID</th><th>Name</th><th>Category</th><th class="num">Price</th><th class="num">Quantity</th><th class="num">Reorder level</th><th></th></tr></thead><tbody>` +
-      items.map((p) => `<tr><td>${esc(p.product_id)}</td><td>${esc(p.name)}</td><td>${esc(p.category)}</td><td class="num">${money(p.price)}</td><td class="num">${num(p.quantity)}</td><td class="num">${num(p.reorder_level)}</td>
-        <td class="num"><button class="small" data-edit="${esc(p.product_id)}">Edit</button> <button class="small danger" data-del="${esc(p.product_id)}">Delete</button></td></tr>`).join("") + "</tbody></table>"
-      : '<div class="empty">No products found.</div>';
+    $("list").innerHTML = items.length ? `<table><thead><tr><th>Code</th><th>Product name</th><th>Category</th><th class="num">Price per unit</th><th class="num">In stock</th><th class="num">Reorder level</th><th class="num">Actions</th></tr></thead><tbody>` +
+      items.map((p) => `<tr><td>${esc(p.product_id)}</td><td><b>${esc(p.name)}</b></td><td>${esc(p.category)}</td><td class="num">${money(p.price)}</td><td class="num">${num(p.quantity)}</td><td class="num">${num(p.reorder_level)}</td>
+        <td class="num"><div class="button-row" style="justify-content:flex-end"><button class="small" data-edit="${esc(p.product_id)}">Change</button><button class="small danger" data-del="${esc(p.product_id)}">Delete</button></div></td></tr>`).join("") + "</tbody></table>"
+      : '<div class="empty">No products match. Add a product above, or clear the search.</div>';
     window._products = Object.fromEntries(items.map((p) => [p.product_id, p]));
   } catch (e) { toast(e.message, "error"); }
 }
 
 $("addForm").addEventListener("submit", async (ev) => {
   ev.preventDefault();
-  const btn = ev.submitter;
-  await busy(btn, async () => {
+  await busy(ev.submitter, async () => {
     const body = { name: $("f_name").value, category: $("f_cat").value, price: $("f_price").value,
       quantity: $("f_qty").value || 0, reorder_level: $("f_reorder").value || 0 };
     if ($("f_id").value.trim()) body.product_id = $("f_id").value.trim();
     const p = await api("/products", { json: body });
-    toast(`Added ${p.name} (${p.product_id})`);
+    toast(`${p.name} was added with the code ${p.product_id}.`);
     $("addForm").reset(); $("f_qty").value = 0; $("f_reorder").value = 0;
     await Promise.all([loadCategories(), loadList()]);
   });
@@ -41,15 +40,15 @@ $("list").addEventListener("click", async (ev) => {
   const edit = ev.target.closest("[data-edit]"), del = ev.target.closest("[data-del]");
   if (edit) {
     const p = window._products[edit.dataset.edit]; editing = p.product_id;
-    $("e_idLabel").textContent = p.product_id;
+    $("e_idLabel").textContent = p.name;
     $("e_name").value = p.name; $("e_cat").value = p.category; $("e_price").value = p.price; $("e_reorder").value = p.reorder_level;
     $("editDlg").showModal();
   } else if (del) {
     const p = window._products[del.dataset.del];
-    if (!confirm(`Delete "${p.name}" (${p.product_id})?\nIts inventory history and predictions will be deleted too.`)) return;
+    if (!confirm(`Delete "${p.name}" (${p.product_id})?\n\nIts stock history and saved predictions will also be deleted. This cannot be undone.`)) return;
     await busy(del, async () => {
       await api("/products/" + encodeURIComponent(p.product_id), { method: "DELETE" });
-      toast("Product deleted");
+      toast(`${p.name} was deleted.`);
       await Promise.all([loadCategories(), loadList()]);
     });
   }
@@ -61,7 +60,7 @@ $("editForm").addEventListener("submit", async (ev) => {
   await busy(ev.submitter, async () => {
     await api("/products/" + encodeURIComponent(editing), { method: "PUT", json: {
       name: $("e_name").value, category: $("e_cat").value, price: $("e_price").value, reorder_level: $("e_reorder").value } });
-    $("editDlg").close(); toast("Product updated");
+    $("editDlg").close(); toast("The changes were saved.");
     await Promise.all([loadCategories(), loadList()]);
   });
 });
